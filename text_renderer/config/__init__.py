@@ -2,7 +2,7 @@ import importlib
 import os
 import typing
 from abc import abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Tuple, Union
 
@@ -158,13 +158,13 @@ class RenderCfg:
     corpus_effects: Union[Effects, List[Effects]] = None
     bg_dir: Path = None
     pre_load_bg_img: bool = True
-    layout: Layout = SameLineLayout()
+    layout: Layout = field(default_factory=SameLineLayout)
     perspective_transform: PerspectiveTransformCfg = None
     layout_effects: Effects = None
     render_effects: Effects = None
     height: int = 32
     gray: bool = True
-    text_color_cfg: TextColorCfg = None
+    text_color_cfg: TextColorCfg = field(default_factory=SimpleTextColorCfg)
     return_bg_and_mask: bool = False
 
 
@@ -197,10 +197,10 @@ def get_cfg(config_file: str) -> List[GeneratorCfg]:
 
     """
     module = import_module_from_file(config_file)
+    print(module)
     cfgs = getattr(module, "configs", None)
     if cfgs is None:
         raise RuntimeError(f"Load configs failed: {config_file}")
-
     assert all(
         [isinstance(cfg, GeneratorCfg) for cfg in cfgs]
     ), "Please make sure all items in configs is GeneratorCfg"

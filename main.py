@@ -91,7 +91,7 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+def main(args):
     mp.set_start_method("spawn", force=True)
     manager = mp.Manager()
     data_queue = manager.Queue()
@@ -127,3 +127,6 @@ if __name__ == "__main__":
 
             data_queue.put(STOP_TOKEN)
             db_writer_process.join()
+
+if __name__ == "__main__":
+    main()
