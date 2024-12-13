@@ -19,3 +19,6 @@ workspace2
 node_modules/
 package.json
 package-lock.json
+
+# local package build folders
+build/**
