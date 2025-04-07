@@ -77,24 +77,47 @@ class Corpus:
             FontText: A FontText object contains text and font.
 
         """
+        
         try:
             text = self.get_text()
         except Exception as e:
             logger.exception(e)
             raise RetryError()
 
-        if self.cfg.clip_length != -1 and len(text) > self.cfg.clip_length:
-            text = text[: self.cfg.clip_length]
+        if hasattr(self.cfg, 'clip_length') and self.cfg.clip_length != -1 and len(text) > self.cfg.clip_length:
+             text = text[: self.cfg.clip_length]
 
         font, support_chars, font_path = self.font_manager.get_font()
         status, intersect = self.font_manager.check_support(text, support_chars)
-        if not status:
-            err_msg = (
-                f"{self.__class__.__name__} {font_path} not support chars: {intersect}"
-            )
-            logger.debug(err_msg)
-            raise RetryError(err_msg)
 
+        if not status:
+            # Initial check failed based on cache
+            # Log the issue if desired (this is the source of your DEBUG logs)
+            err_msg = (
+                 f"{self.__class__.__name__} {Path(font_path).name} not support chars: {intersect}"
+            )
+            #logger.debug(err_msg)
+            raise RetryError(err_msg) # Raise to retry
+
+        # --- Add this explicit rendering check ---
+        try:
+            bbox = font.getmask(text).getbbox()
+            if bbox is None:
+                # Passed initial check, but failed rendering check!
+                #logger.debug(
+                #    f"Font '{Path(font_path).name}' passed cache check but getmask().getbbox() returned None for text: '{text}'. Retrying."
+                #)
+                # Raise RetryError to force resampling
+                raise RetryError("Glyph rendering failed (getbbox is None)")
+        except Exception as e:
+            # Catch other potential errors during the getmask/getbbox itself
+            #logger.warning(
+            #    f"Exception during getmask/getbbox validation for font '{Path(font_path).name}' and text '{text}': {e}"
+            #)
+            raise RetryError("Exception during getmask/getbbox validation")
+        # --- End of added check ---
+
+        # If BOTH checks passed, create and return the FontText object
         return FontText(font, text, font_path, self.cfg.horizontal)
 
     @abstractmethod
