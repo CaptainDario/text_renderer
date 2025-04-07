@@ -27,7 +27,8 @@ class BgManager:
                 if pre_load:
                     self.bg_imgs.append(self._get_bg(str(p)))
 
-        assert len(self.bg_imgs) != 0, "background image is empty"
+        if pre_load:
+            assert len(self.bg_imgs) != 0, "background image is empty"
 
     def _is_transparent_image(self, p: Path):
         pil_img: PILImage = Image.open(p)
