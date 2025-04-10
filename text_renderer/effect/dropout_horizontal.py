@@ -26,7 +26,7 @@ class DropoutHorizontal(Effect):
         pim = img.load()
 
         for _ in range(self.num_line):
-            row = random.randint(1, img.height - self.thickness - 1)
+            row = random.randint(1, max(1, img.height - self.thickness - 1))
             for i in range(self.thickness):
                 for col in range(img.width):
                     self.fix_pick(pim, col, row + i, (0, 20))

@@ -27,7 +27,7 @@ class DropoutVertical(Effect):
         pim = img.load()
 
         for _ in range(self.num_line):
-            col = random.randint(1, img.width - self.thickness - 1)
+            col = random.randint(1, max(1, img.width - self.thickness - 1))
             for i in range(self.thickness):
                 for row in range(img.height):
                     self.fix_pick(pim, col + i, row, (0, 20))
